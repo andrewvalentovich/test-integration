@@ -35,7 +35,7 @@ class CreateLead
      * @param string $method
      * @param string $crm_func
      * @param array $data
-     * @return false|string
+     * @return string|int
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function sendRequest($method, $crm_func, array $data)
@@ -45,19 +45,29 @@ class CreateLead
 
         try {
             // Отправляем запрос
-            $client->request($method, $url, [
+            $response = $client->request($method, $url, [
                 "query" => static::generateQuery($data)
             ]);
         } catch (ClientException $e) { // Ловим ошибки 4хх
-            $error = ($e->getResponse()->getReasonPhrase());
-            Log::error("Ошибка {$e->getResponse()->getStatusCode()} {$e->getResponse()->getReasonPhrase()} при создании лида, сработало исключение в Services/Bitrix/CreateLead callRequest()", [
+            $error = "Ошибка {$e->getResponse()->getStatusCode()} {$e->getResponse()->getReasonPhrase()} при создании лида!";
+            Log::error($error . " Cработало исключение в Services/Bitrix/CreateLead callRequest()", [
                 'error' => true,
                 'line' => 60
             ]);
         }
 
-        // Возвращаем false, если всё хорошо, или возвращаем $error, если словили искоючение
-        return isset($error) ? $error : false;
+        // Возвращаем id лида, если всё хорошо, или возвращаем $error, если словили искоючение
+        return isset($error) ? $error : json_decode($response->getBody()->getContents())->result;
+    }
+
+    /**
+     * @param $id
+     * @return string
+     */
+    public static function getLinkCrmDealDetails($id)
+    {
+        $concrete = 'crm/deal/details/';
+        return env('CRM_BITRIX_URL') . $concrete . $id . '/';
     }
 
 

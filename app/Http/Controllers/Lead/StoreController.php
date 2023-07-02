@@ -3,13 +3,13 @@
 
 namespace App\Http\Controllers\Lead;
 
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Lead\StoreRequest;
 use App\Http\Services\Bitrix\CreateLead;
 use App\Http\Services\Telegram\Bot;
 use App\Models\Lead;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class StoreController extends Controller
 {
@@ -24,12 +24,13 @@ class StoreController extends Controller
         $response = CreateLead::sendRequest("GET", "crm.lead.add", $data);
 
         // Если нет ошибок - в $responce получаем false и выполняем сценарий ниже
-        if(!$response) {
+        if(is_integer($response)) {
             $data['birth_day'] = Carbon::parse($data['birth_day']);
-            // При подстановке такого же номера телефона для нового лида но с другим индексом (+7 вместо 8 и наоборот) создастся лид.
+
+            // *при подстановке такого же номера телефона для нового лида но с другим индексом (+7 вместо 8 и наоборот) создастся лид
             $lead = Lead::firstOrCreate(['phone' => $data['phone'], 'email' => $data['email']], $data);
             Bot::sendMessage(
-                "Создан лид!\n".
+                "Создан лид " . CreateLead::getLinkCrmDealDetails($response) . "\n".
                 "Имя: {$lead['name']}\n".
                 "Фамилия: {$lead['surname']}\n".
                 "Отчество: {$lead['patronymic']}\n".
@@ -38,8 +39,13 @@ class StoreController extends Controller
                 "Почта: {$lead['email']}\n".
                 "Комментарий: {$lead['comment']}\n"
             );
-        } else {
+        } elseif (is_string($response)) {
             Bot::sendMessage("Ошибка создания лида: " . $response);
+        } else {
+            Log::error("Не строка и не число в App\Http\Controllers\Lead __invoke()", [
+                'error' => true,
+                'line' => 44
+            ]);
         }
 
         return redirect()->route('lead.create');
