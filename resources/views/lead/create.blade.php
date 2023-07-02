@@ -32,10 +32,10 @@
                             @enderror
                         </div>
                         <div class="form-group mb-3">
-                            <label for="birthDay">Дата рождения</label>
-                            <input type="text" name="birthDay" value="{{ old('birthDay') }}" class="form-control" id="birthDay" placeholder="22.03.1992">
-                            @error('birthDay')
-                            <label class="text-danger" for="birthDay">{{ $message }}</label>
+                            <label for="birth_day">Дата рождения</label>
+                            <input type="text" name="birth_day" value="{{ old('birth_day') }}" class="form-control" id="birth_day" placeholder="22.03.1992">
+                            @error('birth_day')
+                            <label class="text-danger" for="birth_day">{{ $message }}</label>
                             @enderror
                         </div>
                         <div class="form-group mb-3">
@@ -70,7 +70,7 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        flatpickr("#birthDay", {
+        flatpickr("#birth_day", {
             dateFormat: "d.m.Y"
         });
     </script>
