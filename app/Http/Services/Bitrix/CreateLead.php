@@ -50,14 +50,14 @@ class CreateLead
             ]);
         } catch (ClientException $e) { // Ловим ошибки 4хх
             $error = ($e->getResponse()->getReasonPhrase());
-            Log::error("Ошибка при создании лида, сработало исключение в Services/Bitrix/CreateLead callRequest()", [
+            Log::error("Ошибка {$e->getResponse()->getStatusCode()} {$e->getResponse()->getReasonPhrase()} при создании лида, сработало исключение в Services/Bitrix/CreateLead callRequest()", [
                 'error' => true,
                 'line' => 60
             ]);
         }
 
         // Возвращаем false, если всё хорошо, или возвращаем $error, если словили искоючение
-        return isset($error) ? false : $error;
+        return isset($error) ? $error : false;
     }
 
 
